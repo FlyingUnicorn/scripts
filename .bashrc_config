@@ -270,7 +270,7 @@ trash_comp() {
 #############
 #  SCRIPTS  #
 #############
-source hist_parser.sh
+source /home/$USER/.scripts/hist_parser.sh
 
 
 echo -e "$ICyan --- Bashrc read --- $Color_Off"
