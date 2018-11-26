@@ -13,7 +13,9 @@ FMT_TIMESTAMP_HHMM = '%H:%M'
 # Helper Functions #
 ####################
 def fmt_dur(dur):
-  return '{:2}:{:02}'.format(int(dur / 60), dur % 60)
+  sign = ' ' if dur > 0 else '-'
+  dur = abs(dur)
+  return '{}{:02}:{:02}'.format(sign, int(dur / 60), dur % 60)
 
 def fmt_date(date):
   # date in datetime format
