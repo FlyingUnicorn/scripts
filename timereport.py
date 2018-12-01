@@ -202,7 +202,7 @@ class Sessions(list):
                         dct_filtered[date][project].append(
                             SessionEntryFormatted(stype='n',
                                                   project=project,
-                                                  start=se.timestamp,
+                                                  start=tstart.timestamp,
                                                   start_msg=tstart.msg))
                     else:
                         tend = tstart.timestamp
