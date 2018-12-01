@@ -1,4 +1,4 @@
-
+#!/usr/bin/env python3
 import os
 import sys
 import time
@@ -15,7 +15,13 @@ FMT_TIMESTAMP_HHMM = '%H:%M'
 def fmt_dur(dur):
   sign = ' ' if dur > 0 else '-'
   dur = abs(dur)
-  return '{}{:02}:{:02}'.format(sign, int(dur / 60), dur % 60)
+  return '{}{:2}:{:02}'.format(sign, int(dur / 60), dur % 60)
+
+def fmt_dur_h(dur):
+  sign = ' ' if dur > 0 else '-'
+  dur = abs(dur)
+  return '{}{:4} ({:2})'.format(sign, round(dur / 60, 1), round((round(dur / 60, 1)-(dur/60))*60), 0)
+
 
 def fmt_date(date):
   # date in datetime format
@@ -98,6 +104,7 @@ class Sessions(list):
                 d_start=datetime.strptime('{}-{}'.format(datetime.now().year, week) + '-1', "%Y-%W-%w")
                 d_end=d_start+timedelta(days=7)
 
+        dct_stats_yw = {}
         for date, dct_project in sorted(dct.items()):
 
             # filter dates
@@ -106,6 +113,7 @@ class Sessions(list):
                 continue
             if d_end and cmp_date > d_end:
                 continue
+            year, week, _ = cmp_date.isocalendar()
 
             print('Date: {}'.format(cmp_date.strftime('%Y-%m-%d <w-%W %A>')))
             total_project = 0
@@ -124,8 +132,16 @@ class Sessions(list):
                 else:
                     dct_time_projects[project] += total_day
 
+                if year not in dct_stats_yw:
+                  dct_stats_yw[year] = {}
+
+                if week not in dct_stats_yw[year]:
+                  dct_stats_yw[year][week] = total_day
+                else:
+                  dct_stats_yw[year][week] += total_day
+
                 ## Print day stats
-                print('Total: {} >  Project: {}'.format(fmt_dur(total_day), project))
+                print('Total: {} [{}] >  Project: {}'.format(fmt_dur(total_day), fmt_dur_h(total_day), project))
                 if filter_detail_level >= 3:
                     print(str_day)
             total += total_project
@@ -134,6 +150,11 @@ class Sessions(list):
         for project, project_total in sorted(dct_time_projects.items()):
             print('Project <{}> total: {}'.format(project, fmt_dur(project_total)))
         print('Total: {}'.format(fmt_dur(total)))
+
+        for year, dct_week in sorted(dct_stats_yw.items()):
+          print('Year: {}'.format(year))
+          for week, total_week in sorted(dct_week.items()):
+            print('  Week: {:2} > {} [{}]'.format(week, fmt_dur(total_week), fmt_dur_h(total_week)))
 
     def filter_stats(self):
         dct_filtered = {}
