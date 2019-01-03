@@ -17,10 +17,14 @@ def fmt_dur(dur):
   dur = abs(dur)
   return '{}{:2}:{:02}'.format(sign, int(dur / 60), dur % 60)
 
-def fmt_dur_h(dur):
+def fmt_dur_h(dur, diff=True):
   sign = ' ' if dur > 0 else '-'
   dur = abs(dur)
-  return '{}{:4} ({:2})'.format(sign, round(dur / 60, 1), round((round(dur / 60, 1)-(dur/60))*60), 0)
+
+  str_diff = ''
+  if diff:
+    str_diff = ' ({:2})'.format(round((round(dur / 60, 1)-(dur/60))*60), 0)
+  return '{}{:4}{}'.format(sign, round(dur / 60, 1), str_diff)
 
 
 def fmt_date(date):
@@ -136,9 +140,11 @@ class Sessions(list):
                   dct_stats_yw[year] = {}
 
                 if week not in dct_stats_yw[year]:
-                  dct_stats_yw[year][week] = total_day
-                else:
-                  dct_stats_yw[year][week] += total_day
+                  dct_stats_yw[year][week] = [0] * 8 #total_day
+                dct_stats_yw[year][week][cmp_date.isoweekday()] = total_day
+
+                #else:
+                #  dct_stats_yw[year][week] += total_day
 
                 ## Print day stats
                 print('Total: {} [{}] >  Project: {}'.format(fmt_dur(total_day), fmt_dur_h(total_day), project))
@@ -153,8 +159,20 @@ class Sessions(list):
 
         for year, dct_week in sorted(dct_stats_yw.items()):
           print('Year: {}'.format(year))
-          for week, total_week in sorted(dct_week.items()):
-            print('  Week: {:2} > {} [{}]'.format(week, fmt_dur(total_week), fmt_dur_h(total_week)))
+          str_per_day = ''
+          for d in ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su']:
+            str_per_day += '{}   '.format(d)
+          print('{}{}'.format(' ' * 36, str_per_day))
+          
+          for week, lst_week in sorted(dct_week.items()):
+
+            str_per_day = ''
+            for n in range(1, 8):
+              if lst_week[n]:
+                str_per_day += '{}'.format(fmt_dur_h(lst_week[n], False))
+              else:
+                str_per_day += ' ' * 5
+            print('  Week: {:2} > {} [{}] > {}'.format(week, fmt_dur(sum(lst_week)), fmt_dur_h(sum(lst_week)), str_per_day))
 
     def filter_stats(self):
         dct_filtered = {}
